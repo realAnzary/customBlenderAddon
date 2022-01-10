@@ -1,2 +1,2 @@
 # customBlenderAddon
-Ein Addon für Blender
+Ein Addon für Blender 3.0
