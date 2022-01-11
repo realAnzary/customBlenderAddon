@@ -23,6 +23,7 @@ class CustomAddonPanel(bpy.types.Panel):
         layout = self.layout
         layout.operator('custom.spawn_anchor', text="Ankerpunkte setzen")
         layout.operator('custom.center_selected', text="Objekt zentrieren")
+        layout.operator('custom.visualize_joints', text="Joints anzeigen")
         layout.prop(context.scene.custom_props, "follow_bool")
         layout.operator('custom.spawn_bones', text="Armature & Knochen hinzufügen")
         layout.label(text="Joint Positionen setzen")
@@ -160,8 +161,101 @@ class VisualizeJoints(bpy.types.Operator):
     bl_label = "Adds Placeholders to show the Joints"
 
     def execute(self, context):
-        self.report({"WARNING"}, "TO DO")
+        old_placeholder = find_multiple_by_name(context.scene, "Placeholder")
+        bpy.ops.object.select_all(action="DESELECT")
+        for obj in old_placeholder:
+            obj.select_set(True)
+        bpy.ops.object.delete()
+
+        point_list = [context.scene.custom_props.cruris_vec, context.scene.custom_props.talus_vec,
+                      context.scene.custom_props.calcaneus_vec, context.scene.custom_props.antetarsus_vec]
+
+        for joints in point_list:
+            bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=1.0, calc_uvs=True,
+                                                 enter_editmode=False, align='WORLD', location=joints,
+                                                 rotation=(0.0, 0.0, 0.0), scale=(1.0, 1.0, 1.0))
+            bpy.context.active_object.name = "Placeholder"
         return {"FINISHED"}
+
+
+class jointGizmos(bpy.types.GizmoGroup):
+    bl_label = "Test Gizmo"
+    bl_idname = "OBJECT_GGT_gizmo_test"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'WINDOW'
+    bl_options = {'3D', 'PERSISTENT'}
+
+    @classmethod
+    def poll(cls, context):
+        ob = context.object
+        return ob and ob.type == 'MESH' and ("Placeholder" in ob.name)
+
+    def setup(self, context):
+        giz_type_1 = self.gizmos.new("GIZMO_GT_cage_3d")
+        giz_type_2 = self.gizmos.new("GIZMO_GT_cage_3d")
+        giz_type_3 = self.gizmos.new("GIZMO_GT_cage_3d")
+        giz_type_4 = self.gizmos.new("GIZMO_GT_cage_3d")
+
+        giz_type_1.matrix_basis = bpy.data.objects["Placeholder"].matrix_world.normalized()
+        giz_type_2.matrix_basis = bpy.data.objects["Placeholder.001"].matrix_world.normalized()
+        giz_type_2.matrix_basis = bpy.data.objects["Placeholder.002"].matrix_world.normalized()
+        giz_type_2.matrix_basis = bpy.data.objects["Placeholder.003"].matrix_world.normalized()
+
+        self.giz1 = giz_type_1
+        self.giz2 = giz_type_2
+        self.giz3 = giz_type_3
+        self.giz4 = giz_type_4
+
+    def refresh(self, context):
+
+        # Joint 1
+        vec = mathutils.Vector((context.scene.custom_props.cruris_vec[0],
+                                context.scene.custom_props.cruris_vec[1],
+                                context.scene.custom_props.cruris_vec[2]))
+        newMat = mathutils.Matrix()
+
+        newMat[0][3] = vec[0]
+        newMat[1][3] = vec[1]
+        newMat[2][3] = vec[2]
+
+        self.giz1.matrix_basis = newMat.normalized()
+
+        # Joint 2
+        vec = mathutils.Vector((context.scene.custom_props.talus_vec[0],
+                                context.scene.custom_props.talus_vec[1],
+                                context.scene.custom_props.talus_vec[2]))
+        newMat = mathutils.Matrix()
+
+        newMat[0][3] = vec[0]
+        newMat[1][3] = vec[1]
+        newMat[2][3] = vec[2]
+
+        self.giz2.matrix_basis = newMat.normalized()
+
+        # Joint 3
+        vec = mathutils.Vector((context.scene.custom_props.antetarsus_vec[0],
+                                context.scene.custom_props.antetarsus_vec[1],
+                                context.scene.custom_props.antetarsus_vec[2]))
+        newMat = mathutils.Matrix()
+
+        newMat[0][3] = vec[0]
+        newMat[1][3] = vec[1]
+        newMat[2][3] = vec[2]
+
+        self.giz3.matrix_basis = newMat.normalized()
+
+        # Joint 4
+        # Joint 3
+        vec = mathutils.Vector((context.scene.custom_props.calcaneus_vec[0],
+                                context.scene.custom_props.calcaneus_vec[1],
+                                context.scene.custom_props.calcaneus_vec[2]))
+        newMat = mathutils.Matrix()
+
+        newMat[0][3] = vec[0]
+        newMat[1][3] = vec[1]
+        newMat[2][3] = vec[2]
+
+        self.giz4.matrix_basis = newMat.normalized()
 
 
 bl_info = {
@@ -203,6 +297,7 @@ def register():
     bpy.utils.register_class(SpawnBones)
     bpy.utils.register_class(CenterSelected)
     bpy.utils.register_class(VisualizeJoints)
+    bpy.utils.register_class(jointGizmos)
 
     bpy.utils.register_class(SetPositionJoint1)
     bpy.utils.register_class(SetPositionJoint2)
@@ -222,6 +317,7 @@ def unregister():
     bpy.utils.unregister_class(SpawnBones)
     bpy.utils.unregister_class(CenterSelected)
     bpy.utils.unregister_class(VisualizeJoints)
+    bpy.utils.unregister_class(jointGizmos)
 
     bpy.utils.unregister_class(SetPositionJoint1)
     bpy.utils.unregister_class(SetPositionJoint2)
