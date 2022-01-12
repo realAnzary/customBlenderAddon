@@ -154,6 +154,10 @@ class CenterSelected(bpy.types.Operator):
     bl_label = "Center selected Object"  # Name in UI
     bl_options = {'REGISTER', 'UNDO'}  # Enable undo
 
+    @classmethod
+    def poll(cls, context):
+        return context.mode == "OBJECT"
+
     def execute(self, context):
         bpy.context.area.type = 'VIEW_3D'
         bpy.context.scene.cursor.location = (0.0, 0.0, 0.0)

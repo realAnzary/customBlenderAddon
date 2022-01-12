@@ -5,7 +5,7 @@
 - [x] Gizmos zum Visualisieren hinzufügen
   - [ ] Eventuell Custom-Gizmos einbauen
   - [ ] Placeholder anpassen (Mesh und Größe ändern)
-- [ ] Context-Error bei der "Objekt zentrieren"-Funktion beheben
+- [x] Context-Error bei der "Objekt zentrieren"-Funktion beheben
 - [ ] Ui-Panel etwas anpassen (Beschriftung etc.)
 - [ ] Allgemeines Code Clean-Up
 
