@@ -17,20 +17,23 @@ class CustomAddonPanel(bpy.types.Panel):
     bl_idname = "OBJECT_PT_custom_panel"
     bl_region_type = 'WINDOW'
     bl_space_type = 'PROPERTIES'
-    bl_label = 'Custom Addon Tools'
+    bl_label = 'Addon Rigging Tools'
 
     def draw(self, context):
         layout = self.layout
-        layout.operator('custom.spawn_anchor', text="Ankerpunkte setzen")
+        layout.label(text="Allgemeine Tools")
         layout.operator('custom.center_selected', text="Objekt zentrieren")
-        layout.operator('custom.visualize_joints', text="Joints anzeigen")
-        layout.prop(context.scene.custom_props, "follow_bool")
+        layout.label(text="3D Cursor Tools")
+        layout.operator('custom.spawn_anchor', text="Ankerpunkte setzen")
+        layout.prop(context.scene.custom_props, "follow_bool", text="3D Cursor zentrieren")
+        layout.label(text="Rigging Tools")
         layout.operator('custom.spawn_bones', text="Armature & Knochen hinzufügen")
+        layout.operator('custom.visualize_joints', text="Joints anzeigen")
         layout.label(text="Joint Positionen setzen")
-        layout.operator('custom.set_value_joint1', text="Cruris/Joint1 Position setzen")
-        layout.operator('custom.set_value_joint2', text="Talus/Joint2 Position setzen")
-        layout.operator('custom.set_value_joint3', text="Antetarsus/Joint3 Position setzen")
-        layout.operator('custom.set_value_joint4', text="Calcaneus/Joint4 Position setzen")
+        layout.operator('custom.set_value_joint1', text="Cruris / Joint1 Position setzen")
+        layout.operator('custom.set_value_joint2', text="Talus / Joint2 Position setzen")
+        layout.operator('custom.set_value_joint3', text="Antetarsus / Joint3 Position setzen")
+        layout.operator('custom.set_value_joint4', text="Calcaneus / Joint4 Position setzen")
         layout.label(text="Joint Informationen")
         layout.prop(context.scene.custom_props, "cruris_vec")
         layout.prop(context.scene.custom_props, "talus_vec")
@@ -39,6 +42,8 @@ class CustomAddonPanel(bpy.types.Panel):
 
 
 class SpawnAnchorPoints(bpy.types.Operator):
+    """Fügt der Szene Objekte hinzu; Dienen als Anhaltspunkte um 3D Cursor zu zentrieren;
+Muss im Edit-Mode benutzt werden und platziert für jeden asugewählten Vertex ein Ankerpunkt"""
     bl_idname = 'custom.spawn_anchor'
     bl_label = "Adds Anchor Object to the Scene"
     bl_options = {'REGISTER', 'UNDO'}
@@ -67,6 +72,7 @@ class SpawnAnchorPoints(bpy.types.Operator):
 
 
 class SpawnBones(bpy.types.Operator):
+    """Vebindet alle Joints in der Szene mit Knochen"""
     bl_idname = 'custom.spawn_bones'
     bl_label = "Spawn Bones in corresbonding Position"
     bl_options = {'REGISTER', 'UNDO'}
@@ -143,6 +149,7 @@ class SetPositionJoint4(bpy.types.Operator):
 
 
 class CenterSelected(bpy.types.Operator):
+    """Zentriert ein ausgewähltes Objekt und den 3D Cursor"""
     bl_idname = "custom.center_selected"  # UID/Methodname
     bl_label = "Center selected Object"  # Name in UI
     bl_options = {'REGISTER', 'UNDO'}  # Enable undo
@@ -157,6 +164,7 @@ class CenterSelected(bpy.types.Operator):
 
 
 class VisualizeJoints(bpy.types.Operator):
+    """Setzt an jede Joint Position in der Szene eine Sphere und ein Gizmo zum visualisieren"""
     bl_idname = "custom.visualize_joints"
     bl_label = "Adds Placeholders to show the Joints"
 
