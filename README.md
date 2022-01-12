@@ -1,6 +1,14 @@
 # Custom Blender Addon
 ### Blender 3.0 ist mindestens nötig um das Addon zu benutzen!
 
+###ToDo:
+- [x] Gizmos zum Visualisieren hinzufügen
+  - [ ] Eventuell Custom-Gizmos einbauen
+  - [ ] Placeholder anpassen (Mesh und Größe ändern)
+- [ ] Context-Error bei der "Objekt zentrieren"-Funktion beheben
+- [ ] Ui-Panel etwas anpassen (Beschriftung etc.)
+- [ ] Allgemeines Code Clean-Up
+
 ###Aufbau vom Addon
 Die Funktionen des Addons basieren auf einer "PropertyGroup" die man in Blender selbst nicht sehen kann.
 Daher gibt es ein extra UI-Panel, welches alle wichtigen Informationen zu den Addon Daten und Funktionen beinhaltet.
