@@ -71,6 +71,7 @@ Das Panel befindet sich jederzeit in der "Property"-Region vom Blender User-Inte
        Sie erstellt in der Szene neue Objekte, die den Namen "Placeholder" haben und die aktuelle Position der Punkte/Joints besitzen.
        Zum aktualisieren der "Placeholder" kann diese Funktion einfach nochmal aufgerufen werden.
     <br><br>
+    Ansicht von Placeholdern und Gizmos:
     ![](assets/gizmos.png)
     - Anmerkung:
       - Wenn man die Placeholder verschiebt verändert man nicht die Position der wirklichen Punkte/Joints
