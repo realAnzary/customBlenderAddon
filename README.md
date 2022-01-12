@@ -4,7 +4,7 @@
 ###Aufbau vom Addon
 Die Funktionen des Addons basieren auf einer "PropertyGroup" die man in Blender selbst nicht sehen kann.
 Daher gibt es ein extra UI-Panel, welches alle wichtigen Informationen zu den Addon Daten und Funktionen beinhaltet.
-Das Panel befindet sich im der "Property"-Region vom Blender User-Interface.
+Das Panel befindet sich jederzeit in der "Property"-Region vom Blender User-Interface.
 <br><br>
 ![Panel-Location](assets/panel_loc.png)
 
@@ -16,7 +16,7 @@ Das Panel befindet sich im der "Property"-Region vom Blender User-Interface.
       Vor dem zentrieren:
       ![](assets/center_obj_1.png)
       <br><br>
-      Nach dem Zentrieren:
+      Nach dem zentrieren:
       ![](assets/center_obj_2.png)
   <br><br>
 - "Ankerpunkte setzen"-Funktion
@@ -26,10 +26,10 @@ Das Panel befindet sich im der "Property"-Region vom Blender User-Interface.
     - mindestens 1 Vertex ist ausgewählt
   <br><br>
   - Beschreibung:
-    - Wenn die Vorrausetzung erfüllt sind, wird für jeden ausgewählten Vertex eine neues Objekt der Szene hinzugefügt.
-      Diese neuen Objekte haben den Namen "Ankerpunkt". Die Objekte in der Szene an sich haben keine Funktion,
-      sie sind aber benötigt um die "3D Cursor zentrieren"-Funktion auszuführen.
-      Sie können jederzeit manuell gelöscht werden, mit Hilfe dieser FUnktion neu erstellt werden oder manuell neu erstellt werden.
+    - Wenn die Vorrausetzungen erfüllt sind, wird für jeden ausgewählten Vertex eine neues Objekt der Szene hinzugefügt.
+      Diese neuen Objekte haben den Namen "Ankerpunkt". Die Objekte in der Szene an sich, haben keine Funktion,
+      sie sind aber notwendig um die "3D Cursor zentrieren"-Funktion auszuführen.
+      Sie können jederzeit manuell gelöscht werden, mit Hilfe dieser Funktion neu erstellt werden oder manuell neu erstellt werden.
       Das wichtige ist der Name bei den Objekten, d.h. solange sie "AnchorPoint" im Namen haben erkennt das Addon sie als einen solchen an.
     <br><br>
     2 Ankerpunkte in der Szene:
@@ -59,17 +59,18 @@ Das Panel befindet sich im der "Property"-Region vom Blender User-Interface.
 <br><br>
 - -"Joints anzeigen"-Funktion:
     - Beschreibung:
-       - Um die momentane Position der Punkte/Joints in der Szene zu sehen kann diese Funktion benutzt werden.
+       - Um die momentane Position der Punkte/Joints in der Szene zu sehen, kann diese Funktion benutzt werden.
        Sie erstellt in der Szene neue Objekte, die den Namen "Placeholder" haben und die aktuelle Position der Punkte/Joints besitzen.
-       Zum aktualisieren der "Placeholder" kann diese Funktion einfach nochmal ausgerufen werden.
+       Zum aktualisieren der "Placeholder" kann diese Funktion einfach nochmal aufgerufen werden.
     <br><br>
     ![](assets/gizmos.png)
     - Anmerkung:
-      - Wenn man die Placeholder verschiebt veränadert man nicht die Position der wirklichen Punkte/Joints!
+      - Wenn man die Placeholder verschiebt verändert man nicht die Position der wirklichen Punkte/Joints
+<br><br>
 - "Joint setzen"-Funktion:
   - Bescchreibung:
     - Um die tatsächliche Postion von den Punkten/Joints für die Knochen zu verändern muss diese Funktion benutzt werden.
-      Jeder Punkt hat eine eigene Funktion um das zu machen. Die Position die gespeichert wird entspricht der aktuellen Position der 3D Cursor.
+      Jeder Punkt hat eine eigene Funktion um das zu machen. Die Position die gespeichert wird, entspricht der aktuellen Position des 3D Cursor.
   - Anmerkung:
     - Um zu sehen welche die aktuelle Position ist, kann die "Joints anzeigen"-Funktion benutzt werden.
-    Alternativ kann man den Vektor-Wert von den Positionen im "Joint Informationen" Teil vom dem Panel sehen 
+    Alternativ kann man den Vektor-Wert von den Positionen im "Joint Informationen" Teil vom dem Panel sehen. 
