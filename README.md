@@ -10,7 +10,8 @@
 - [x] Context-Error bei der "Objekt zentrieren"-Funktion beheben
 - [ ] Ui-Panel etwas anpassen (Beschriftung etc.)
 - [ ] Allgemeines Code Clean-Up
-
+- [ ] Anleitung zum installieren hier einfügen
+ 
 ##Aufbau vom Addon
 Die Funktionen des Addons basieren auf einer "PropertyGroup" die man in Blender selbst nicht sehen kann.
 Daher gibt es ein extra UI-Panel, welches alle wichtigen Informationen zu den Addon Daten und Funktionen beinhaltet.
