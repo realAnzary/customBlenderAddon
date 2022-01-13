@@ -11,7 +11,7 @@ bl_info = {
     "category": "Object",
     "location": "Porperties Panel",
     "warning": "",
-    "version": (1, 0, 0),
+    "version": (1, 0, 1),
     "blender": (3, 0, 0)
 }
 # Region: Allgemeine Funktionen
