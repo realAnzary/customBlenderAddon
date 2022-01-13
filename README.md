@@ -6,7 +6,7 @@
 - [x] Gizmos zum Visualisieren hinzufügen
   - [ ] Eventuell Custom-Gizmos einbauen
   - [x] Placeholder anpassen (Größe ändern)
-  - [ ] Placeholder-Objketen ganz entfernen + Möglichkeit Gizmos an/aus zu machen
+  - [ ] Placeholder-Objekten ganz trennen + Möglichkeit Gizmos an/aus zu machen
 - [x] Context-Error bei der "Objekt zentrieren"-Funktion beheben
 - [ ] Ui-Panel etwas anpassen (Beschriftung etc.)
 - [ ] Allgemeines Code Clean-Up
