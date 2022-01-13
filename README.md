@@ -1,15 +1,17 @@
 # Custom Blender Addon
-### Blender 3.0 ist mindestens nötig um das Addon zu benutzen!
+## Blender 3.0 ist mindestens nötig um das Addon zu benutzen!
+>Beschreibung: Ein Addon für Blender, welches das Riggen von Füßen erleichtern soll
 
-###ToDo:
+##ToDo:
 - [x] Gizmos zum Visualisieren hinzufügen
   - [ ] Eventuell Custom-Gizmos einbauen
-  - [ ] Placeholder anpassen (Mesh und Größe ändern)
+  - [x] Placeholder anpassen (Größe ändern)
+  - [ ] Placeholder-Objketen ganz entfernen + Möglichkeit Gizmos an/aus zu machen
 - [x] Context-Error bei der "Objekt zentrieren"-Funktion beheben
 - [ ] Ui-Panel etwas anpassen (Beschriftung etc.)
 - [ ] Allgemeines Code Clean-Up
 
-###Aufbau vom Addon
+##Aufbau vom Addon
 Die Funktionen des Addons basieren auf einer "PropertyGroup" die man in Blender selbst nicht sehen kann.
 Daher gibt es ein extra UI-Panel, welches alle wichtigen Informationen zu den Addon Daten und Funktionen beinhaltet.
 Das Panel befindet sich jederzeit in der "Property"-Region vom Blender User-Interface.
