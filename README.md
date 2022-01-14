@@ -42,7 +42,7 @@ Das Panel befindet sich jederzeit in der "Property"-Region vom Blender User-Inte
       Diese neuen Objekte haben den Namen "Ankerpunkt". Die Objekte in der Szene an sich, haben keine Funktion,
       sie sind aber notwendig um die "3D Cursor zentrieren"-Funktion auszuführen.
       Sie können jederzeit manuell gelöscht werden, mit Hilfe dieser Funktion neu erstellt werden oder manuell neu erstellt werden.
-      Das wichtige ist der Name bei den Objekten, d.h. solange sie "AnchorPoint" im Namen haben erkennt das Addon sie als einen solchen an.
+      Das wichtige ist der Name bei den Objekten, d.h. solange sie "AnchorPoint" im Namen haben, erkennt das Addon sie als einen solchen an.
     <br><br>
     2 Ankerpunkte in der Szene:
     ![](assets/ankerpunkte.png)
