@@ -14,9 +14,8 @@ bl_info = {
     "version": (1, 0, 1),
     "blender": (3, 0, 0)
 }
-# Region: Allgemeine Funktionen
 
-# Alle Objekte mit bestimmten Name in Szene finden
+
 def find_multiple_by_name(scene, name):
     returned_objects = []
     for objects in scene.objects:
@@ -29,9 +28,7 @@ def find_multiple_by_name(scene, name):
             returned_objects.append(objects)
     return returned_objects
 
-# EndRegion
 
-# Globale Variablen/Porperties vom Addon
 class CustomPropertyGroup(bpy.types.PropertyGroup):
     # Bool für 3D-Cursor Position
     follow_bool: bpy.props.BoolProperty(name="center_3d_cursor")
@@ -43,7 +40,7 @@ class CustomPropertyGroup(bpy.types.PropertyGroup):
     # Placeholder Skalierung
     joint_size: bpy.props.FloatProperty(name="joint_scale", default=1)
 
-# UI-Panel
+
 class CustomAddonPanel(bpy.types.Panel):
     bl_idname = "OBJECT_PT_custom_panel"
     bl_region_type = 'WINDOW'
@@ -72,18 +69,16 @@ class CustomAddonPanel(bpy.types.Panel):
         layout.prop(context.scene.custom_props, "antetarsus_vec")
         layout.prop(context.scene.custom_props, "calcaneus_vec")
 
-# Region: Operatoren/Funktionen vom Addon
 
-# Objekt zentrieren
 class CenterSelected(bpy.types.Operator):
     """Zentriert ein ausgewähltes Objekt und den 3D Cursor"""
-    bl_idname = "custom.center_selected"  # UID/Methodname
-    bl_label = "Center selected Object"  # Name in UI
-    bl_options = {'REGISTER', 'UNDO'}  # Enable undo
+    bl_idname = "custom.center_selected"
+    bl_label = "Center selected Object"
+    bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
-        return context.mode == "OBJECT"  # Fix für Context-Error
+        return context.mode == "OBJECT"
 
     def execute(self, context):
         bpy.context.area.type = 'VIEW_3D'
@@ -93,7 +88,7 @@ class CenterSelected(bpy.types.Operator):
         bpy.context.area.ui_type = 'PROPERTIES'
         return {'FINISHED'}
 
-# Ankerpuntke in Szene platzieren
+
 class SpawnAnchorPoints(bpy.types.Operator):
     """Fügt der Szene Objekte hinzu; Dienen als Anhaltspunkte um 3D Cursor zu zentrieren;
 Muss im Edit-Mode benutzt werden und platziert für jeden asugewählten Vertex ein Ankerpunkt"""
@@ -107,7 +102,6 @@ Muss im Edit-Mode benutzt werden und platziert für jeden asugewählten Vertex e
 
     def execute(self, context):
         name_list = ["AnchorPoint.{:03d}".format(c + 1) for c in range(0, 10)]
-        # ToDO: Namen-Liste ist eigentlich unnötig, vlt lieber einfügen das Nutzer Benennung festlegen kann
         selected_obj = context.object.data
         mesh = bmesh.new()
         mesh = bmesh.from_edit_mesh(selected_obj)
@@ -123,7 +117,7 @@ Muss im Edit-Mode benutzt werden und platziert für jeden asugewählten Vertex e
 
         return {"FINISHED"}
 
-# Knochen in Szene platzieren
+
 class SpawnBones(bpy.types.Operator):
     """Vebindet alle Joints in der Szene mit Knochen"""
     bl_idname = 'custom.spawn_bones'
@@ -160,12 +154,11 @@ class SpawnBones(bpy.types.Operator):
 
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.select_all(action='DESELECT')
-        # ToDo: Rausfinden wie man active_object verändern kann, bzw ob es überhaupt geht!
-        # -> Knochen sofort mit Mesh verbinden
+
         self.report({'INFO'}, f"Parent setzen/ Knochen und Mesh verbinden!")
         return {"FINISHED"}
 
-# Objekt an der Stelle der Joints platzieren
+
 class VisualizeJoints(bpy.types.Operator):
     """Setzt an jede Joint Position in der Szene eine Sphere und ein Gizmo zum visualisieren"""
     bl_idname = "custom.visualize_joints"
@@ -192,16 +185,19 @@ class VisualizeJoints(bpy.types.Operator):
             bpy.context.active_object.name = "Placeholder"
         return {"FINISHED"}
 
-# Gizmos an Stelle der Placeholder setzen
+
 class jointGizmos(bpy.types.GizmoGroup):
-    # ToDo: Vlt die Spheren der anderen Funktion löschen, damit die Szene nicht so voll wird?
-    #  -> Vlt Spheren ganz entfernen
-    # ToDO: Einfügen das man die Gizmos manuell aus und an machen kann
     bl_label = "Test Gizmo"
     bl_idname = "OBJECT_GGT_gizmo_test"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
     bl_options = {'3D', 'PERSISTENT'}
+
+    def __init__(self):
+        self.giz1 = None
+        self.giz2 = None
+        self.giz3 = None
+        self.giz4 = None
 
     @classmethod
     def poll(cls, context):
@@ -267,7 +263,7 @@ class jointGizmos(bpy.types.GizmoGroup):
 
         self.giz4.matrix_basis = newMat.normalized()
 
-# Property Vec_1 setzen
+
 class SetPositionJoint1(bpy.types.Operator):
     bl_idname = 'custom.set_value_joint1'
     bl_label = "Sets the Vector Value for Joint 1"
@@ -276,7 +272,7 @@ class SetPositionJoint1(bpy.types.Operator):
         context.scene.custom_props.cruris_vec = bpy.context.scene.cursor.location
         return {"FINISHED"}
 
-# Property Vec_2 setzen
+
 class SetPositionJoint2(bpy.types.Operator):
     bl_idname = 'custom.set_value_joint2'
     bl_label = "Sets the Vector Value for Joint 2"
@@ -285,7 +281,7 @@ class SetPositionJoint2(bpy.types.Operator):
         context.scene.custom_props.talus_vec = bpy.context.scene.cursor.location
         return {"FINISHED"}
 
-# Property Vec_3 setzen
+
 class SetPositionJoint3(bpy.types.Operator):
     bl_idname = 'custom.set_value_joint3'
     bl_label = "Sets the Vector Value for Joint 3"
@@ -294,7 +290,7 @@ class SetPositionJoint3(bpy.types.Operator):
         context.scene.custom_props.antetarsus_vec = bpy.context.scene.cursor.location
         return {"FINISHED"}
 
-# Property Vec_4 setzen
+
 class SetPositionJoint4(bpy.types.Operator):
     bl_idname = 'custom.set_value_joint4'
     bl_label = "Sets the Vector Value for Joint 4"
@@ -304,8 +300,6 @@ class SetPositionJoint4(bpy.types.Operator):
         return {"FINISHED"}
 
 
-
-# Szenen-Update Logik/ 3D Cursor zentrieren
 def handlerFunc(scene):
     if scene.custom_props.follow_bool is True:
         targetPos = mathutils.Vector((0, 0, 0))
@@ -313,46 +307,40 @@ def handlerFunc(scene):
         for points in anchorPoints:
             targetPos += points.location
         bpy.context.scene.cursor.location = targetPos / len(anchorPoints)
-#EndRegion
 
 
-# ToDo: register und unregister lesbarer machen, Liste aller Klassen benutzen
+classes = (
+    SpawnAnchorPoints,
+    SpawnBones,
+    CenterSelected,
+    VisualizeJoints,
+    jointGizmos,
+    SetPositionJoint1,
+    SetPositionJoint2,
+    SetPositionJoint3,
+    SetPositionJoint4,
+    CustomPropertyGroup,
+    CustomAddonPanel
+)
+
+
 def register():
-    bpy.utils.register_class(SpawnAnchorPoints)
-    bpy.utils.register_class(SpawnBones)
-    bpy.utils.register_class(CenterSelected)
-    bpy.utils.register_class(VisualizeJoints)
-    bpy.utils.register_class(jointGizmos)
+    from bpy.utils import register_class
 
-    bpy.utils.register_class(SetPositionJoint1)
-    bpy.utils.register_class(SetPositionJoint2)
-    bpy.utils.register_class(SetPositionJoint3)
-    bpy.utils.register_class(SetPositionJoint4)
+    for cls in classes:
+        register_class(cls)
 
-    bpy.utils.register_class(CustomPropertyGroup)
     bpy.types.Scene.custom_props = bpy.props.PointerProperty(type=CustomPropertyGroup)
-
-    bpy.utils.register_class(CustomAddonPanel)
-
     bpy.app.handlers.depsgraph_update_post.append(handlerFunc)
 
 
 def unregister():
-    bpy.utils.unregister_class(SpawnAnchorPoints)
-    bpy.utils.unregister_class(SpawnBones)
-    bpy.utils.unregister_class(CenterSelected)
-    bpy.utils.unregister_class(VisualizeJoints)
-    bpy.utils.unregister_class(jointGizmos)
-
-    bpy.utils.unregister_class(SetPositionJoint1)
-    bpy.utils.unregister_class(SetPositionJoint2)
-    bpy.utils.unregister_class(SetPositionJoint3)
-    bpy.utils.unregister_class(SetPositionJoint4)
+    from bpy.utils import unregister_class
 
     del bpy.types.Scene.custom_props
-    bpy.utils.unregister_class(CustomPropertyGroup)
 
-    bpy.utils.unregister_class(CustomAddonPanel)
+    for cls in classes:
+        unregister_class(cls)
 
     bpy.app.handlers.depsgraph_update_post.remove(handlerFunc)
 

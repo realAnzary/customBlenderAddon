@@ -2,15 +2,6 @@
 ## Blender 3.0 ist mindestens nötig um das Addon zu benutzen!
 >Beschreibung: Ein Addon für Blender, welches das Riggen von Füßen erleichtern soll
 
-ToDo:
-- [x] Gizmos zum Visualisieren hinzufügen
-  - [ ] Eventuell Custom-Gizmos einbauen
-  - [x] Placeholder anpassen (Größe ändern)
-  - [ ] Placeholder-Objekten ganz trennen + Möglichkeit Gizmos an/aus zu machen
-- [x] Context-Error bei der "Objekt zentrieren"-Funktion beheben
-- [ ] Ui-Panel etwas anpassen (Beschriftung etc.)
-- [ ] Allgemeines Code Clean-Up
-- [ ] Anleitung zum installieren hier einfügen
  
 Aufbau vom Addon:
 <br>
