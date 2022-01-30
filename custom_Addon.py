@@ -91,18 +91,18 @@ class SpawnAnchorPoints(bpy.types.Operator):
     """Fügt der Szene Objekte hinzu; Dienen als Anhaltspunkte um 3D Cursor zu zentrieren;
 Muss im Edit-Mode benutzt werden und platziert für jeden asugewählten Vertex ein Ankerpunkt"""
     bl_idname = 'custom.spawn_anchor'
-    bl_label = "Adds Anchor Object to the Scene"
+    bl_label = "Adds Anchor-Points to the Scene"
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
-        return context.active_object.select_get() and context.mode == "EDIT_MESH"
+        return context.mode == "EDIT_MESH"
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def execute(self, context):
         name_list = ["AnchorPoint.{:03d}".format(c + 1) for c in range(0, 10)]
         selected_obj = context.object.data
-        mesh = bmesh.new()
+        mesh = bmesh.new()  # Vlt Unused Api Documentation hat das aber drinnen
         mesh = bmesh.from_edit_mesh(selected_obj)
         selectedVerts = [verts for verts in mesh.verts if verts.select]
         for selected in range(0, len(selectedVerts)):
@@ -120,7 +120,7 @@ Muss im Edit-Mode benutzt werden und platziert für jeden asugewählten Vertex e
 class SpawnBones(bpy.types.Operator):
     """Vebindet alle Joints in der Szene mit Knochen"""
     bl_idname = 'custom.spawn_bones'
-    bl_label = "Spawn Bones in corresbonding Position"
+    bl_label = "Spawn Bones in corresponding Position"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -307,8 +307,8 @@ class SetPositionJoint4(bpy.types.Operator):
 
 def handlerFunc(scene):
     if scene.custom_props.follow_bool is True:
-        offsetProp = scene.custom_props.cursor_offset
         targetPos = mathutils.Vector((0, 0, 0))
+        offsetProp = scene.custom_props.cursor_offset
         offset = mathutils.Vector((offsetProp[0], offsetProp[1], offsetProp[2]))
         anchorPoints = find_by_name(scene, "AnchorPoint")
         for points in anchorPoints:
