@@ -16,22 +16,18 @@ bl_info = {
 }
 
 
-def find_multiple_by_name(scene, name):
-    returned_objects = []
+def find_by_name(scene, name):
+    returnedObjects = []
     for objects in scene.objects:
-        if objects.name.isalpha():
-            truncated_name = objects.name
-        else:
-            length = len(objects.name)
-            truncated_name = objects.name[0:length - 4]
-        if truncated_name == name:
-            returned_objects.append(objects)
-    return returned_objects
+        if name in objects.name:
+            returnedObjects.append(objects)
+    return returnedObjects
 
 
 class CustomPropertyGroup(bpy.types.PropertyGroup):
-    # Bool für 3D-Cursor Position
+    # Props für 3D-Cursor Position
     follow_bool: bpy.props.BoolProperty(name="center_3d_cursor")
+    cursor_offset: bpy.props.FloatVectorProperty(name="offset")
     # Punkte im Fuß
     cruris_vec: bpy.props.FloatVectorProperty(name="joint_top")
     talus_vec: bpy.props.FloatVectorProperty(name="joint_middle")
@@ -54,6 +50,7 @@ class CustomAddonPanel(bpy.types.Panel):
         layout.label(text="3D Cursor Tools")
         layout.operator('custom.spawn_anchor', text="Ankerpunkte setzen")
         layout.prop(context.scene.custom_props, "follow_bool", text="3D Cursor zentrieren")
+        layout.prop(context.scene.custom_props, "cursor_offset", text="Cursor Offset")
         layout.label(text="Rigging Tools")
         layout.operator('custom.spawn_bones', text="Armature & Knochen hinzufügen")
         layout.operator('custom.visualize_joints', text="Joints anzeigen")
@@ -80,6 +77,7 @@ class CenterSelected(bpy.types.Operator):
     def poll(cls, context):
         return context.mode == "OBJECT"
 
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def execute(self, context):
         bpy.context.area.type = 'VIEW_3D'
         bpy.context.scene.cursor.location = (0.0, 0.0, 0.0)
@@ -100,6 +98,7 @@ Muss im Edit-Mode benutzt werden und platziert für jeden asugewählten Vertex e
     def poll(cls, context):
         return context.active_object.select_get() and context.mode == "EDIT_MESH"
 
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def execute(self, context):
         name_list = ["AnchorPoint.{:03d}".format(c + 1) for c in range(0, 10)]
         selected_obj = context.object.data
@@ -164,8 +163,9 @@ class VisualizeJoints(bpy.types.Operator):
     bl_idname = "custom.visualize_joints"
     bl_label = "Adds Placeholders to show the Joints"
 
+    # noinspection PyMethodMayBeStatic
     def execute(self, context):
-        old_placeholder = find_multiple_by_name(context.scene, "Placeholder")
+        old_placeholder = find_by_name(context.scene, "Placeholder")
         bpy.ops.object.select_all(action="DESELECT")
         for obj in old_placeholder:
             obj.select_set(True)
@@ -204,6 +204,7 @@ class jointGizmos(bpy.types.GizmoGroup):
         ob = context.object
         return ob and ob.type == 'MESH' and "Placeholder" in ob.name
 
+    # noinspection PyUnusedLocal
     def setup(self, context):
         giz_type_1 = self.gizmos.new("GIZMO_GT_cage_3d")
         giz_type_2 = self.gizmos.new("GIZMO_GT_cage_3d")
@@ -268,6 +269,7 @@ class SetPositionJoint1(bpy.types.Operator):
     bl_idname = 'custom.set_value_joint1'
     bl_label = "Sets the Vector Value for Joint 1"
 
+    # noinspection PyMethodMayBeStatic
     def execute(self, context):
         context.scene.custom_props.cruris_vec = bpy.context.scene.cursor.location
         return {"FINISHED"}
@@ -277,6 +279,7 @@ class SetPositionJoint2(bpy.types.Operator):
     bl_idname = 'custom.set_value_joint2'
     bl_label = "Sets the Vector Value for Joint 2"
 
+    # noinspection PyMethodMayBeStatic
     def execute(self, context):
         context.scene.custom_props.talus_vec = bpy.context.scene.cursor.location
         return {"FINISHED"}
@@ -286,6 +289,7 @@ class SetPositionJoint3(bpy.types.Operator):
     bl_idname = 'custom.set_value_joint3'
     bl_label = "Sets the Vector Value for Joint 3"
 
+    # noinspection PyMethodMayBeStatic
     def execute(self, context):
         context.scene.custom_props.antetarsus_vec = bpy.context.scene.cursor.location
         return {"FINISHED"}
@@ -295,6 +299,7 @@ class SetPositionJoint4(bpy.types.Operator):
     bl_idname = 'custom.set_value_joint4'
     bl_label = "Sets the Vector Value for Joint 4"
 
+    # noinspection PyMethodMayBeStatic
     def execute(self, context):
         context.scene.custom_props.calcaneus_vec = bpy.context.scene.cursor.location
         return {"FINISHED"}
@@ -302,11 +307,13 @@ class SetPositionJoint4(bpy.types.Operator):
 
 def handlerFunc(scene):
     if scene.custom_props.follow_bool is True:
+        offsetProp = scene.custom_props.cursor_offset
         targetPos = mathutils.Vector((0, 0, 0))
-        anchorPoints = find_multiple_by_name(scene, "AnchorPoint")
+        offset = mathutils.Vector((offsetProp[0], offsetProp[1], offsetProp[2]))
+        anchorPoints = find_by_name(scene, "AnchorPoint")
         for points in anchorPoints:
             targetPos += points.location
-        bpy.context.scene.cursor.location = targetPos / len(anchorPoints)
+        bpy.context.scene.cursor.location = targetPos / len(anchorPoints) + offset
 
 
 classes = (
