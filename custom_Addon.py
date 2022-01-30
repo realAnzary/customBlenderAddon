@@ -179,7 +179,7 @@ class VisualizeJoints(bpy.types.Operator):
                                       context.scene.custom_props.joint_size))
 
         for joints in point_list:
-            bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=1.0, calc_uvs=True,
+            bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=8, radius=1.0, calc_uvs=True,
                                                  enter_editmode=False, align='WORLD', location=joints,
                                                  rotation=(0.0, 0.0, 0.0), scale=scale_vec)
             bpy.context.active_object.name = "Placeholder"
