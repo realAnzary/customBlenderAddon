@@ -1,6 +1,7 @@
 import bmesh
 import bpy
 import mathutils
+import bpy_extras
 
 
 bl_info = {
@@ -24,6 +25,25 @@ def find_by_name(scene, name):
     return returnedObjects
 
 
+def add_angle_object(self, context):
+    scale_x = self.scale.x
+    scale_y = self.scale.y
+    scale_z = self.scale.z
+
+    verts = [
+        mathutils.Vector((0 * scale_x, 0 * scale_y, 1 * scale_z)),
+        mathutils.Vector((0 * scale_x, 0 * scale_y, 0 * scale_z)),
+        mathutils.Vector((1 * scale_x, 0 * scale_y, 0 * scale_z))
+    ]
+
+    edges = [[0, 1, 2]]
+    faces = []
+
+    mesh = bpy.data.meshes.new(name="New Object")
+    mesh.from_pydata(verts, faces, edges)
+    bpy_extras.object_utils.object_data_add(context, mesh, operator=self)
+
+
 class CustomPropertyGroup(bpy.types.PropertyGroup):
     # Props für 3D-Cursor Position
     follow_bool: bpy.props.BoolProperty(name="center_3d_cursor")
@@ -34,7 +54,7 @@ class CustomPropertyGroup(bpy.types.PropertyGroup):
     antetarsus_vec: bpy.props.FloatVectorProperty(name="joint_front")
     calcaneus_vec: bpy.props.FloatVectorProperty(name="joint_back")
     # Placeholder Skalierung
-    joint_size: bpy.props.FloatProperty(name="joint_scale", default=1)
+    joint_size: bpy.props.FloatProperty(name="joint_scale", default=0.5)
 
 
 class CustomAddonPanel(bpy.types.Panel):
@@ -47,6 +67,7 @@ class CustomAddonPanel(bpy.types.Panel):
         layout = self.layout
         layout.label(text="Allgemeine Tools")
         layout.operator('custom.center_selected', text="Objekt zentrieren")
+        layout.operator('custom.add_angle_object', text="90° Objekt")
         layout.label(text="3D Cursor Tools")
         layout.operator('custom.spawn_anchor', text="Ankerpunkte setzen")
         layout.prop(context.scene.custom_props, "follow_bool", text="3D Cursor zentrieren")
@@ -77,13 +98,32 @@ class CenterSelected(bpy.types.Operator):
     def poll(cls, context):
         return context.mode == "OBJECT"
 
-    # noinspection PyMethodMayBeStatic,PyUnusedLocal
+    # noinspection PyMethodMayBeStatic
     def execute(self, context):
         bpy.context.area.type = 'VIEW_3D'
         bpy.context.scene.cursor.location = (0.0, 0.0, 0.0)
         bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
         bpy.ops.view3d.snap_selected_to_cursor()
         bpy.context.area.ui_type = 'PROPERTIES'
+        return {'FINISHED'}
+
+
+class AddAngleObject(bpy.types.Operator, bpy_extras.object_utils.AddObjectHelper):
+    """Create a new Mesh Object"""
+    bl_idname = "custom.add_angle_object"
+    bl_label = "Add Mesh Object"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    scale: bpy.props.FloatVectorProperty(
+        name="scale",
+        default=(1.0, 1.0, 1.0),
+        subtype='TRANSLATION',
+        description="scaling",
+    )
+
+    def execute(self, context):
+        add_angle_object(self, context)
+
         return {'FINISHED'}
 
 
@@ -112,7 +152,6 @@ Muss im Edit-Mode benutzt werden und platziert für jeden asugewählten Vertex e
             object.location = selectedVerts[selected].co
             object.empty_display_size = 2
             object.empty_display_type = "PLAIN_AXES"
-            object.select_set(True)
 
         return {"FINISHED"}
 
@@ -123,6 +162,7 @@ class SpawnBones(bpy.types.Operator):
     bl_label = "Spawn Bones in corresponding Position"
     bl_options = {'REGISTER', 'UNDO'}
 
+    # noinspection PyMethodMayBeStatic
     def execute(self, context):
         bpy.ops.object.armature_add(enter_editmode=False, align="WORLD", location=(0, 0, 0), scale=(1, 1, 1))
         arm_obj = bpy.data.objects["Armature"]
@@ -139,7 +179,6 @@ class SpawnBones(bpy.types.Operator):
         bone = edit_bones.new('Bone1')
         bone.head = context.scene.custom_props.cruris_vec
         bone.tail = context.scene.custom_props.talus_vec
-        bone.select_tail = True
 
         bone = edit_bones.new('Bone2')
         bone.head = context.scene.custom_props.talus_vec
@@ -154,7 +193,7 @@ class SpawnBones(bpy.types.Operator):
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.select_all(action='DESELECT')
 
-        self.report({'INFO'}, f"Parent setzen/ Knochen und Mesh verbinden!")
+        # self.report({'INFO'}, f"Parent setzen/Knochen und Mesh verbinden!")
         return {"FINISHED"}
 
 
@@ -327,7 +366,9 @@ classes = (
     SetPositionJoint3,
     SetPositionJoint4,
     CustomPropertyGroup,
-    CustomAddonPanel
+    CustomAddonPanel,
+
+    AddAngleObject
 )
 
 
