@@ -12,7 +12,7 @@ bl_info = {
     "category": "Object",
     "location": "Porperties Panel",
     "warning": "",
-    "version": (1, 0, 1),
+    "version": (1, 0, 2),
     "blender": (3, 0, 0)
 }
 
@@ -27,6 +27,7 @@ def find_by_name(scene, name):
 
 def add_angle_object(self, context):
     from mathutils import Vector
+
     scale_x = self.scale.x
     scale_y = self.scale.y
     scale_z = self.scale.z
@@ -50,11 +51,10 @@ def add_angle_object(self, context):
     edges = [[0, 1], [1, 3], [3, 2], [2, 0],  # Face Bot
              [4, 5], [5, 9], [9, 8], [8, 4],  # Face Top
              [10, 11], [11, 7], [7, 6], [6, 10],  # Face Half Top
-             # Connections Side Pos
-             [0, 4], [10, 8], [2, 6],
-             # Connections Side Neg
-             [1, 5], [11, 9], [3, 7]
+             [0, 4], [10, 8], [2, 6],  # Connections Side Pos
+             [1, 5], [11, 9], [3, 7]  # Connections Side Neg
              ]
+
     faces = [[1, 3, 7, 11, 9, 5],  # Side Neg
              [0, 2, 6, 10, 8, 4],   # Side Pos
              [0, 1, 3, 2],  # Face Bot
@@ -168,7 +168,7 @@ Muss im Edit-Mode benutzt werden und platziert für jeden asugewählten Vertex e
     def execute(self, context):
         name_list = ["AnchorPoint.{:03d}".format(c + 1) for c in range(0, 10)]
         selected_obj = context.object.data
-        mesh = bmesh.new()  # Vlt Unused Api Documentation hat das aber drinnen
+        mesh = bmesh.new()
         mesh = bmesh.from_edit_mesh(selected_obj)
         selectedVerts = [verts for verts in mesh.verts if verts.select]
         for selected in range(0, len(selectedVerts)):
@@ -218,8 +218,6 @@ class SpawnBones(bpy.types.Operator):
 
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.select_all(action='DESELECT')
-
-        # self.report({'INFO'}, f"Parent setzen/Knochen und Mesh verbinden!")
         return {"FINISHED"}
 
 
@@ -257,6 +255,8 @@ class jointGizmos(bpy.types.GizmoGroup):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
     bl_options = {'3D', 'PERSISTENT'}
+
+    __slots__ = ['giz1', 'giz2', 'giz3', 'giz4']
 
     def __init__(self):
         self.giz1 = None
