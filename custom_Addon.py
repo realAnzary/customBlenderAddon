@@ -26,21 +26,51 @@ def find_by_name(scene, name):
 
 
 def add_angle_object(self, context):
+    from mathutils import Vector
     scale_x = self.scale.x
     scale_y = self.scale.y
     scale_z = self.scale.z
 
     verts = [
-        mathutils.Vector((0 * scale_x, 0 * scale_y, 1 * scale_z)),
-        mathutils.Vector((0 * scale_x, 0 * scale_y, 0 * scale_z)),
-        mathutils.Vector((1 * scale_x, 0 * scale_y, 0 * scale_z))
+        Vector((0 * scale_x, .5 * scale_y, 0 * scale_z)),
+        Vector((0 * scale_x, -.5 * scale_y, 0 * scale_z)),
+        Vector((1 * scale_x, .5 * scale_y, 0 * scale_z)),
+        Vector((1 * scale_x, -.5 * scale_y, 0 * scale_z)),
+        Vector((0 * scale_x, .5 * scale_y, 1 * scale_z)),
+        Vector((0 * scale_x, -.5 * scale_y, 1 * scale_z)),
+
+        Vector((1 * scale_x, .5 * scale_y, .5 * scale_z)),
+        Vector((1 * scale_x, -.5 * scale_y, .5 * scale_z)),
+        Vector((.5 * scale_x, .5 * scale_y, 1 * scale_z)),
+        Vector((.5 * scale_x, -.5 * scale_y, 1 * scale_z)),
+        Vector((.5 * scale_x, .5 * scale_y, .5 * scale_z)),
+        Vector((.5 * scale_x, -.5 * scale_y, .5 * scale_z))
     ]
 
-    edges = [[0, 1, 2]]
-    faces = []
+    edges = [[0, 1], [1, 3], [3, 2], [2, 0],  # Face Bot
+             [4, 5], [5, 9], [9, 8], [8, 4],  # Face Top
+             [10, 11], [11, 7], [7, 6], [6, 10],  # Face Half Top
+             # Connections Side Pos
+             [0, 4], [10, 8], [2, 6],
+             # Connections Side Neg
+             [1, 5], [11, 9], [3, 7]
+             ]
+    faces = [[1, 3, 7, 11, 9, 5],  # Side Neg
+             [0, 2, 6, 10, 8, 4],   # Side Pos
+             [0, 1, 3, 2],  # Face Bot
+             [10, 11, 7, 6],  # Face Half Top
+             [4, 5, 9, 8],  # Face Top
+             [6, 7, 3, 2],  # Face Front
+             [8, 9, 11, 10],  # Face Half Front
+             [0, 4, 5, 1]  # Face Back
+             ]
+    """ 
+    faces = [[0, 1, 3, 2]]
+    edges = []
+    """
 
     mesh = bpy.data.meshes.new(name="New Object")
-    mesh.from_pydata(verts, faces, edges)
+    mesh.from_pydata(verts, edges, faces)
     bpy_extras.object_utils.object_data_add(context, mesh, operator=self)
 
 
