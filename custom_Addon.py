@@ -64,10 +64,6 @@ def add_angle_object(self, context):
              [8, 9, 11, 10],  # Face Half Front
              [0, 4, 5, 1]  # Face Back
              ]
-    """ 
-    faces = [[0, 1, 3, 2]]
-    edges = []
-    """
 
     mesh = bpy.data.meshes.new(name="New Object")
     mesh.from_pydata(verts, edges, faces)
