@@ -32,38 +32,33 @@ def add_angle_object(self, context):
     scale_y = self.scale.y
     scale_z = self.scale.z
 
-    verts = [
-        Vector((0 * scale_x, .5 * scale_y, 0 * scale_z)),
-        Vector((0 * scale_x, -.5 * scale_y, 0 * scale_z)),
-        Vector((1 * scale_x, .5 * scale_y, 0 * scale_z)),
-        Vector((1 * scale_x, -.5 * scale_y, 0 * scale_z)),
-        Vector((0 * scale_x, .5 * scale_y, 1 * scale_z)),
-        Vector((0 * scale_x, -.5 * scale_y, 1 * scale_z)),
+    verts = [Vector((0 * scale_x, .5 * scale_y, 0 * scale_z)),
+             Vector((0 * scale_x, -.5 * scale_y, 0 * scale_z)),
+             Vector((1 * scale_x, .5 * scale_y, 0 * scale_z)),
+             Vector((1 * scale_x, -.5 * scale_y, 0 * scale_z)),
+             Vector((0 * scale_x, .5 * scale_y, 1 * scale_z)),
+             Vector((0 * scale_x, -.5 * scale_y, 1 * scale_z)),
+             Vector((1 * scale_x, .5 * scale_y, .5 * scale_z)),
+             Vector((1 * scale_x, -.5 * scale_y, .5 * scale_z)),
+             Vector((.5 * scale_x, .5 * scale_y, 1 * scale_z)),
+             Vector((.5 * scale_x, -.5 * scale_y, 1 * scale_z)),
+             Vector((.5 * scale_x, .5 * scale_y, .5 * scale_z)),
+             Vector((.5 * scale_x, -.5 * scale_y, .5 * scale_z))]
 
-        Vector((1 * scale_x, .5 * scale_y, .5 * scale_z)),
-        Vector((1 * scale_x, -.5 * scale_y, .5 * scale_z)),
-        Vector((.5 * scale_x, .5 * scale_y, 1 * scale_z)),
-        Vector((.5 * scale_x, -.5 * scale_y, 1 * scale_z)),
-        Vector((.5 * scale_x, .5 * scale_y, .5 * scale_z)),
-        Vector((.5 * scale_x, -.5 * scale_y, .5 * scale_z))
-    ]
+    edges = [[0, 1], [1, 3], [3, 2], [2, 0],
+             [4, 5], [5, 9], [9, 8], [8, 4],
+             [10, 11], [11, 7], [7, 6], [6, 10],
+             [0, 4], [10, 8], [2, 6],
+             [1, 5], [11, 9], [3, 7]]
 
-    edges = [[0, 1], [1, 3], [3, 2], [2, 0],  # Face Bot
-             [4, 5], [5, 9], [9, 8], [8, 4],  # Face Top
-             [10, 11], [11, 7], [7, 6], [6, 10],  # Face Half Top
-             [0, 4], [10, 8], [2, 6],  # Connections Side Pos
-             [1, 5], [11, 9], [3, 7]  # Connections Side Neg
-             ]
-
-    faces = [[1, 3, 7, 11, 9, 5],  # Side Neg
-             [0, 2, 6, 10, 8, 4],   # Side Pos
-             [0, 1, 3, 2],  # Face Bot
-             [10, 11, 7, 6],  # Face Half Top
-             [4, 5, 9, 8],  # Face Top
-             [6, 7, 3, 2],  # Face Front
-             [8, 9, 11, 10],  # Face Half Front
-             [0, 4, 5, 1]  # Face Back
-             ]
+    faces = [[1, 3, 7, 11, 9, 5],
+             [0, 2, 6, 10, 8, 4],
+             [0, 1, 3, 2],
+             [10, 11, 7, 6],
+             [4, 5, 9, 8],
+             [6, 7, 3, 2],
+             [8, 9, 11, 10],
+             [0, 4, 5, 1]]
 
     mesh = bpy.data.meshes.new(name="New Object")
     mesh.from_pydata(verts, edges, faces)
@@ -79,8 +74,8 @@ class CustomPropertyGroup(bpy.types.PropertyGroup):
     talus_vec: bpy.props.FloatVectorProperty(name="joint_middle")
     antetarsus_vec: bpy.props.FloatVectorProperty(name="joint_front")
     calcaneus_vec: bpy.props.FloatVectorProperty(name="joint_back")
-    # Placeholder Skalierung
-    joint_size: bpy.props.FloatProperty(name="joint_scale", default=0.5)
+
+    gizmo_visibility: bpy.props.BoolProperty(name="gizmo_vis", default=True)
 
 
 class CustomAddonPanel(bpy.types.Panel):
@@ -100,8 +95,7 @@ class CustomAddonPanel(bpy.types.Panel):
         layout.prop(context.scene.custom_props, "cursor_offset", text="Cursor Offset")
         layout.label(text="Rigging Tools")
         layout.operator('custom.spawn_bones', text="Armature & Knochen hinzufügen")
-        layout.operator('custom.visualize_joints', text="Joints anzeigen")
-        layout.prop(context.scene.custom_props, "joint_size", text="Placeholder Größe")
+        layout.prop(context.scene.custom_props, "gizmo_visibility", text="Gizmos anzeigen")
         layout.label(text="Joint Positionen setzen")
         layout.operator('custom.set_value_joint1', text="Cruris / Joint1 Position setzen")
         layout.operator('custom.set_value_joint2', text="Talus / Joint2 Position setzen")
@@ -221,37 +215,44 @@ class SpawnBones(bpy.types.Operator):
         return {"FINISHED"}
 
 
-class VisualizeJoints(bpy.types.Operator):
-    """Setzt an jede Joint Position in der Szene eine Sphere und ein Gizmo zum visualisieren"""
-    bl_idname = "custom.visualize_joints"
-    bl_label = "Adds Placeholders to show the Joints"
+shape_Line_Cube = ((0.5, 0.5, -0.5), (-0.5, 0.5, -0.5),
+                   (-0.5, 0.5, -0.5), (-0.5, -0.5, -0.5),
+                   (-0.5, -0.5, -0.5), (0.5, -0.5, -0.5),
+                   (0.5, -0.5, -0.5), (0.5, 0.5, -0.5),
 
-    # noinspection PyMethodMayBeStatic
-    def execute(self, context):
-        old_placeholder = find_by_name(context.scene, "Placeholder")
-        bpy.ops.object.select_all(action="DESELECT")
-        for obj in old_placeholder:
-            obj.select_set(True)
-        bpy.ops.object.delete()
+                   (0.5, 0.5, 0.5), (-0.5, 0.5, 0.5),
+                   (-0.5, 0.5, 0.5), (-0.5, -0.5, 0.5),
+                   (-0.5, -0.5, 0.5), (0.5, -0.5, 0.5),
+                   (0.5, -0.5, 0.5), (0.5, 0.5, 0.5),
 
-        point_list = [context.scene.custom_props.cruris_vec, context.scene.custom_props.talus_vec,
-                      context.scene.custom_props.calcaneus_vec, context.scene.custom_props.antetarsus_vec]
+                   (0.5, 0.5, -0.5), (0.5, 0.5, 0.5),
+                   (-0.5, 0.5, -0.5), (-0.5, 0.5, 0.5),
+                   (-0.5, -0.5, -0.5), (-0.5, -0.5, 0.5),
+                   (0.5, -0.5, -0.5), (0.5, -0.5, 0.5))
 
-        scale_vec = mathutils.Vector((context.scene.custom_props.joint_size,
-                                      context.scene.custom_props.joint_size,
-                                      context.scene.custom_props.joint_size))
 
-        for joints in point_list:
-            bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=8, radius=1.0, calc_uvs=True,
-                                                 enter_editmode=False, align='WORLD', location=joints,
-                                                 rotation=(0.0, 0.0, 0.0), scale=scale_vec)
-            bpy.context.active_object.name = "Placeholder"
-        return {"FINISHED"}
+class GizmoShape_LineCube(bpy.types.Gizmo):
+    bl_idname = "GizmoShape_LineCube"
+
+    __slots__ = ["shape"]
+
+    def __init__(self):
+        self.shape = None
+
+    def draw(self, context):
+        self.draw_custom_shape(self.shape)
+
+    def draw_select(self, context, select_id):
+        self.draw_custom_shape(self.shape, select_id=select_id)
+
+    def setup(self):
+        if not hasattr(self, "custom_shape"):
+            self.shape = self.new_custom_shape('LINES', shape_Line_Cube)
 
 
 class jointGizmos(bpy.types.GizmoGroup):
-    bl_label = "Test Gizmo"
-    bl_idname = "OBJECT_GGT_gizmo_test"
+    bl_label = "Joint Gizmogroup"
+    bl_idname = "OBJECT_GGT_gizmo_joints"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
     bl_options = {'3D', 'PERSISTENT'}
@@ -264,22 +265,32 @@ class jointGizmos(bpy.types.GizmoGroup):
         self.giz3 = None
         self.giz4 = None
 
-    @classmethod
-    def poll(cls, context):
-        ob = context.object
-        return ob and ob.type == 'MESH' and "Placeholder" in ob.name
-
     # noinspection PyUnusedLocal
     def setup(self, context):
-        giz_type_1 = self.gizmos.new("GIZMO_GT_cage_3d")
-        giz_type_2 = self.gizmos.new("GIZMO_GT_cage_3d")
-        giz_type_3 = self.gizmos.new("GIZMO_GT_cage_3d")
-        giz_type_4 = self.gizmos.new("GIZMO_GT_cage_3d")
+        giz_type_1 = self.gizmos.new(GizmoShape_LineCube.bl_idname)
+        giz_type_2 = self.gizmos.new(GizmoShape_LineCube.bl_idname)
+        giz_type_3 = self.gizmos.new(GizmoShape_LineCube.bl_idname)
+        giz_type_4 = self.gizmos.new(GizmoShape_LineCube.bl_idname)
 
-        giz_type_1.matrix_basis = bpy.data.objects["Placeholder"].matrix_world.normalized()
-        giz_type_2.matrix_basis = bpy.data.objects["Placeholder.001"].matrix_world.normalized()
-        giz_type_2.matrix_basis = bpy.data.objects["Placeholder.002"].matrix_world.normalized()
-        giz_type_2.matrix_basis = bpy.data.objects["Placeholder.003"].matrix_world.normalized()
+        giz_type_1.matrix_basis = mathutils.Matrix.Translation((0.0, 0.0, 0.0))
+        giz_type_2.matrix_basis = mathutils.Matrix.Translation((0.0, 0.0, 0.0))
+        giz_type_2.matrix_basis = mathutils.Matrix.Translation((0.0, 0.0, 0.0))
+        giz_type_2.matrix_basis = mathutils.Matrix.Translation((0.0, 0.0, 0.0))
+
+        giz_type_1.line_width = 15.0
+        giz_type_2.line_width = 15.0
+        giz_type_3.line_width = 15.0
+        giz_type_4.line_width = 15.0
+
+        giz_type_1.color = 1.0, 0.0, 0.5
+        giz_type_2.color = 1.0, 0.0, 0.5
+        giz_type_3.color = 1.0, 0.0, 0.5
+        giz_type_4.color = 1.0, 0.0, 0.5
+
+        giz_type_1.scale_basis = 0.5
+        giz_type_2.scale_basis = 0.5
+        giz_type_3.scale_basis = 0.5
+        giz_type_4.scale_basis = 0.5
 
         self.giz1 = giz_type_1
         self.giz2 = giz_type_2
@@ -287,7 +298,7 @@ class jointGizmos(bpy.types.GizmoGroup):
         self.giz4 = giz_type_4
 
     def refresh(self, context):
-        # Joint 1
+        # Joint 1 scene.custom_props.follow_bool
         vec = mathutils.Vector((context.scene.custom_props.cruris_vec[0],
                                 context.scene.custom_props.cruris_vec[1],
                                 context.scene.custom_props.cruris_vec[2]))
@@ -298,6 +309,7 @@ class jointGizmos(bpy.types.GizmoGroup):
         newMat[2][3] = vec[2]
 
         self.giz1.matrix_basis = newMat.normalized()
+        self.giz1.hide = not context.scene.custom_props.gizmo_visibility
 
         # Joint 2
         vec = mathutils.Vector((context.scene.custom_props.talus_vec[0],
@@ -308,6 +320,7 @@ class jointGizmos(bpy.types.GizmoGroup):
         newMat[2][3] = vec[2]
 
         self.giz2.matrix_basis = newMat.normalized()
+        self.giz2.hide = not context.scene.custom_props.gizmo_visibility
 
         # Joint 3
         vec = mathutils.Vector((context.scene.custom_props.antetarsus_vec[0],
@@ -318,6 +331,7 @@ class jointGizmos(bpy.types.GizmoGroup):
         newMat[2][3] = vec[2]
 
         self.giz3.matrix_basis = newMat.normalized()
+        self.giz3.hide = not context.scene.custom_props.gizmo_visibility
 
         # Joint 4
         vec = mathutils.Vector((context.scene.custom_props.calcaneus_vec[0],
@@ -328,6 +342,7 @@ class jointGizmos(bpy.types.GizmoGroup):
         newMat[2][3] = vec[2]
 
         self.giz4.matrix_basis = newMat.normalized()
+        self.giz4.hide = not context.scene.custom_props.gizmo_visibility
 
 
 class SetPositionJoint1(bpy.types.Operator):
@@ -382,19 +397,18 @@ def handlerFunc(scene):
 
 
 classes = (
+    AddAngleObject,
     SpawnAnchorPoints,
     SpawnBones,
     CenterSelected,
-    VisualizeJoints,
+    GizmoShape_LineCube,
     jointGizmos,
     SetPositionJoint1,
     SetPositionJoint2,
     SetPositionJoint3,
     SetPositionJoint4,
     CustomPropertyGroup,
-    CustomAddonPanel,
-
-    AddAngleObject
+    CustomAddonPanel
 )
 
 
