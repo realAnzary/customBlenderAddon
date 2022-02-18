@@ -66,16 +66,17 @@ def add_angle_object(self, context):
 
 
 class CustomPropertyGroup(bpy.types.PropertyGroup):
+    expanded: bpy.props.BoolProperty(default=False)
     # Props für 3D-Cursor Position
-    follow_bool: bpy.props.BoolProperty(name="center_3d_cursor")
-    cursor_offset: bpy.props.FloatVectorProperty(name="offset")
+    follow_bool: bpy.props.BoolProperty()
+    cursor_offset: bpy.props.FloatVectorProperty()
     # Punkte im Fuß
-    cruris_vec: bpy.props.FloatVectorProperty(name="joint_top")
-    talus_vec: bpy.props.FloatVectorProperty(name="joint_middle")
-    antetarsus_vec: bpy.props.FloatVectorProperty(name="joint_front")
-    calcaneus_vec: bpy.props.FloatVectorProperty(name="joint_back")
+    cruris_vec: bpy.props.FloatVectorProperty(default=(0, 0, 5))
+    talus_vec: bpy.props.FloatVectorProperty(default=(0, 0, 0))
+    antetarsus_vec: bpy.props.FloatVectorProperty(default=(5, 0, 0))
+    calcaneus_vec: bpy.props.FloatVectorProperty(default=(-5, 0, 0))
 
-    gizmo_visibility: bpy.props.BoolProperty(name="gizmo_vis", default=True)
+    gizmo_visibility: bpy.props.BoolProperty(default=False)
 
 
 class CustomAddonPanel(bpy.types.Panel):
@@ -101,11 +102,25 @@ class CustomAddonPanel(bpy.types.Panel):
         layout.operator('custom.set_value_joint2', text="Talus / Joint2 Position setzen")
         layout.operator('custom.set_value_joint3', text="Antetarsus / Joint3 Position setzen")
         layout.operator('custom.set_value_joint4', text="Calcaneus / Joint4 Position setzen")
-        layout.label(text="Joint Informationen")
-        layout.prop(context.scene.custom_props, "cruris_vec")
-        layout.prop(context.scene.custom_props, "talus_vec")
-        layout.prop(context.scene.custom_props, "antetarsus_vec")
-        layout.prop(context.scene.custom_props, "calcaneus_vec")
+
+        box = layout.box()
+        row = box.row()
+        row.prop(context.scene.custom_props, "expanded",
+                 icon="TRIA_DOWN" if context.scene.custom_props.expanded else "TRIA_RIGHT",
+                 icon_only=True, emboss=False
+                 )
+        row.label(text="Joint Informationen")
+
+        if context.scene.custom_props.expanded:
+            row = box.row()
+            row.prop(context.scene.custom_props, "cruris_vec")
+            row = box.row()
+            row.prop(context.scene.custom_props, "talus_vec")
+            row = box.row()
+            row.prop(context.scene.custom_props, "antetarsus_vec")
+            row = box.row()
+            row.prop(context.scene.custom_props, "calcaneus_vec")
+        # col = layout.column(heading="Header")
 
 
 class CenterSelected(bpy.types.Operator):
@@ -118,7 +133,7 @@ class CenterSelected(bpy.types.Operator):
     def poll(cls, context):
         return context.mode == "OBJECT"
 
-    # noinspection PyMethodMayBeStatic
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def execute(self, context):
         bpy.context.area.type = 'VIEW_3D'
         bpy.context.scene.cursor.location = (0.0, 0.0, 0.0)
@@ -230,24 +245,57 @@ shape_Line_Cube = ((0.5, 0.5, -0.5), (-0.5, 0.5, -0.5),
                    (-0.5, -0.5, -0.5), (-0.5, -0.5, 0.5),
                    (0.5, -0.5, -0.5), (0.5, -0.5, 0.5))
 
+cube_scale = 1.0
+
+cube_coords = [(cube_scale * -.5, cube_scale * .5, cube_scale * -.5),
+               (cube_scale * -.5, cube_scale * -.5, cube_scale * -.5),
+               (cube_scale * .5, cube_scale * -.5, cube_scale * -.5),
+               (cube_scale * .5, cube_scale * .5, cube_scale * -.5),
+               (cube_scale * -.5, cube_scale * .5, cube_scale * .5),
+               (cube_scale * -.5, cube_scale * -.5, cube_scale * .5),
+               (cube_scale * .5, cube_scale * -.5, cube_scale * .5),
+               (cube_scale * .5, cube_scale * .5, cube_scale * .5)]
+
+shape_Tris_Cube = (cube_coords[0], cube_coords[1], cube_coords[3],
+                   cube_coords[1], cube_coords[2], cube_coords[3],  # Face Bot
+
+                   cube_coords[0], cube_coords[4], cube_coords[7],
+                   cube_coords[7], cube_coords[3], cube_coords[0],  # Face Right
+
+                   cube_coords[4], cube_coords[5], cube_coords[1],
+                   cube_coords[4], cube_coords[1], cube_coords[0],  # Face Back
+
+                   cube_coords[5], cube_coords[6], cube_coords[2],
+                   cube_coords[5], cube_coords[2], cube_coords[1],  # Face Left
+
+                   cube_coords[7], cube_coords[6], cube_coords[2],
+                   cube_coords[7], cube_coords[2], cube_coords[3],  # Face Front
+
+                   cube_coords[4], cube_coords[5], cube_coords[6],
+                   cube_coords[4], cube_coords[6], cube_coords[7],  # Face Front
+                   )
+
 
 class GizmoShape_LineCube(bpy.types.Gizmo):
-    bl_idname = "GizmoShape_LineCube"
+    bl_idname = "GizmoShape_Cube"
 
     __slots__ = ["shape"]
 
     def __init__(self):
         self.shape = None
 
+    # noinspection PyUnusedLocal
     def draw(self, context):
         self.draw_custom_shape(self.shape)
 
+    # noinspection PyUnusedLocal
     def draw_select(self, context, select_id):
         self.draw_custom_shape(self.shape, select_id=select_id)
 
     def setup(self):
         if not hasattr(self, "custom_shape"):
             self.shape = self.new_custom_shape('LINES', shape_Line_Cube)
+            # self.shape = self.new_custom_shape('TRIS', shape_Tris_Cube)
 
 
 class jointGizmos(bpy.types.GizmoGroup):
@@ -272,25 +320,31 @@ class jointGizmos(bpy.types.GizmoGroup):
         giz_type_3 = self.gizmos.new(GizmoShape_LineCube.bl_idname)
         giz_type_4 = self.gizmos.new(GizmoShape_LineCube.bl_idname)
 
-        giz_type_1.matrix_basis = mathutils.Matrix.Translation((0.0, 0.0, 0.0))
-        giz_type_2.matrix_basis = mathutils.Matrix.Translation((0.0, 0.0, 0.0))
-        giz_type_2.matrix_basis = mathutils.Matrix.Translation((0.0, 0.0, 0.0))
-        giz_type_2.matrix_basis = mathutils.Matrix.Translation((0.0, 0.0, 0.0))
+        gizmo_matrix_basis = mathutils.Matrix.Translation((0, 0, 0))
+        gizmo_scale_basis = 0.5
+        gizmo_color = 1.0, .5, 1.0
+        gizmo_line_width = 0.0
 
-        giz_type_1.line_width = 15.0
-        giz_type_2.line_width = 15.0
-        giz_type_3.line_width = 15.0
-        giz_type_4.line_width = 15.0
+        giz_type_1.matrix_basis = gizmo_matrix_basis
+        giz_type_2.matrix_basis = gizmo_matrix_basis
+        giz_type_3.matrix_basis = gizmo_matrix_basis
+        giz_type_4.matrix_basis = gizmo_matrix_basis
 
-        giz_type_1.color = 1.0, 0.0, 0.5
-        giz_type_2.color = 1.0, 0.0, 0.5
-        giz_type_3.color = 1.0, 0.0, 0.5
-        giz_type_4.color = 1.0, 0.0, 0.5
+        giz_type_1.color = gizmo_color
+        giz_type_2.color = gizmo_color
+        giz_type_3.color = gizmo_color
+        giz_type_4.color = gizmo_color
 
-        giz_type_1.scale_basis = 0.5
-        giz_type_2.scale_basis = 0.5
-        giz_type_3.scale_basis = 0.5
-        giz_type_4.scale_basis = 0.5
+        giz_type_1.scale_basis = gizmo_scale_basis
+        giz_type_2.scale_basis = gizmo_scale_basis
+        giz_type_3.scale_basis = gizmo_scale_basis
+        giz_type_4.scale_basis = gizmo_scale_basis
+        # ToDo: LineWidth + Color
+
+        giz_type_1.line_width = gizmo_line_width
+        giz_type_2.line_width = gizmo_line_width
+        giz_type_3.line_width = gizmo_line_width
+        giz_type_4.line_width = gizmo_line_width
 
         self.giz1 = giz_type_1
         self.giz2 = giz_type_2
@@ -298,7 +352,7 @@ class jointGizmos(bpy.types.GizmoGroup):
         self.giz4 = giz_type_4
 
     def refresh(self, context):
-        # Joint 1 scene.custom_props.follow_bool
+        # Joint 1
         vec = mathutils.Vector((context.scene.custom_props.cruris_vec[0],
                                 context.scene.custom_props.cruris_vec[1],
                                 context.scene.custom_props.cruris_vec[2]))
