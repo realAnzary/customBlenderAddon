@@ -32,16 +32,19 @@ def add_angle_object(self, context):
     scale_y = self.scale.y
     scale_z = self.scale.z
 
+    scale = 5
+
     verts = [Vector((0 * scale_x, .5 * scale_y, 0 * scale_z)),
              Vector((0 * scale_x, -.5 * scale_y, 0 * scale_z)),
-             Vector((1 * scale_x, .5 * scale_y, 0 * scale_z)),
-             Vector((1 * scale_x, -.5 * scale_y, 0 * scale_z)),
-             Vector((0 * scale_x, .5 * scale_y, 1 * scale_z)),
-             Vector((0 * scale_x, -.5 * scale_y, 1 * scale_z)),
-             Vector((1 * scale_x, .5 * scale_y, .5 * scale_z)),
-             Vector((1 * scale_x, -.5 * scale_y, .5 * scale_z)),
-             Vector((.5 * scale_x, .5 * scale_y, 1 * scale_z)),
-             Vector((.5 * scale_x, -.5 * scale_y, 1 * scale_z)),
+             Vector((scale * .5 * scale_x, .5 * scale_y, 0 * scale_z)),
+             Vector((scale * .5 * scale_x, -.5 * scale_y, 0 * scale_z)),
+             Vector((0 * scale_x, .5 * scale_y, scale * 1 * scale_z)),
+             Vector((0 * scale_x, -.5 * scale_y, scale * 1 * scale_z)),
+
+             Vector((scale * .5 * scale_x, .5 * scale_y, .5 * scale_z)),
+             Vector((scale * .5 * scale_x, -.5 * scale_y, .5 * scale_z)),
+             Vector((.5 * scale_x, .5 * scale_y, scale * 1 * scale_z)),
+             Vector((.5 * scale_x, -.5 * scale_y, scale * 1 * scale_z)),
              Vector((.5 * scale_x, .5 * scale_y, .5 * scale_z)),
              Vector((.5 * scale_x, -.5 * scale_y, .5 * scale_z))]
 
@@ -65,16 +68,25 @@ def add_angle_object(self, context):
     bpy_extras.object_utils.object_data_add(context, mesh, operator=self)
 
 
+def add_object_button(self, context):
+    self.layout.operator(
+        AddAngleObject.bl_idname,
+        text="Add Angle Object",
+        icon="PLUGIN"
+    )
+
+
 class CustomPropertyGroup(bpy.types.PropertyGroup):
+    # UI-Panel
     expanded: bpy.props.BoolProperty(default=False)
     # Props für 3D-Cursor Position
     follow_bool: bpy.props.BoolProperty()
     cursor_offset: bpy.props.FloatVectorProperty()
     # Punkte im Fuß
-    cruris_vec: bpy.props.FloatVectorProperty(default=(0, 0, 5))
-    talus_vec: bpy.props.FloatVectorProperty(default=(0, 0, 0))
-    antetarsus_vec: bpy.props.FloatVectorProperty(default=(5, 0, 0))
-    calcaneus_vec: bpy.props.FloatVectorProperty(default=(-5, 0, 0))
+    cruris_vec: bpy.props.FloatVectorProperty()
+    talus_vec: bpy.props.FloatVectorProperty()
+    antetarsus_vec: bpy.props.FloatVectorProperty()
+    calcaneus_vec: bpy.props.FloatVectorProperty()
 
     gizmo_visibility: bpy.props.BoolProperty(default=False)
 
@@ -245,7 +257,15 @@ shape_Line_Cube = ((0.5, 0.5, -0.5), (-0.5, 0.5, -0.5),
                    (-0.5, -0.5, -0.5), (-0.5, -0.5, 0.5),
                    (0.5, -0.5, -0.5), (0.5, -0.5, 0.5))
 
-cube_scale = 1.0
+cube_scale = 5.0
+
+shape_Line_Cross = ((0, 0, 0), (0, 0, 1),
+                    (0, 0, 0), (0, 0, -1),
+                    (0, 0, 0), (0, 1, 0),
+                    (0, 0, 0), (0, -1, 0),
+                    (0, 0, 0), (1, 0, 0),
+                    (0, 0, 0), (-1, 0, 0))
+
 
 cube_coords = [(cube_scale * -.5, cube_scale * .5, cube_scale * -.5),
                (cube_scale * -.5, cube_scale * -.5, cube_scale * -.5),
@@ -272,7 +292,7 @@ shape_Tris_Cube = (cube_coords[0], cube_coords[1], cube_coords[3],
                    cube_coords[7], cube_coords[2], cube_coords[3],  # Face Front
 
                    cube_coords[4], cube_coords[5], cube_coords[6],
-                   cube_coords[4], cube_coords[6], cube_coords[7],  # Face Front
+                   cube_coords[4], cube_coords[6], cube_coords[7]  # Face Front
                    )
 
 
@@ -320,10 +340,11 @@ class jointGizmos(bpy.types.GizmoGroup):
         giz_type_3 = self.gizmos.new(GizmoShape_LineCube.bl_idname)
         giz_type_4 = self.gizmos.new(GizmoShape_LineCube.bl_idname)
 
-        gizmo_matrix_basis = mathutils.Matrix.Translation((0, 0, 0))
-        gizmo_scale_basis = 0.5
-        gizmo_color = 1.0, .5, 1.0
-        gizmo_line_width = 0.0
+        gizmo_matrix_basis = mathutils.Matrix.Translation((0, 0, 0)).normalized()
+        gizmo_scale_basis = 1
+        gizmo_color = 1.0, 0.5, 0
+        gizmo_color_highlight = 1, 1, 1
+        gizmo_line_width = 1.0
 
         giz_type_1.matrix_basis = gizmo_matrix_basis
         giz_type_2.matrix_basis = gizmo_matrix_basis
@@ -335,11 +356,15 @@ class jointGizmos(bpy.types.GizmoGroup):
         giz_type_3.color = gizmo_color
         giz_type_4.color = gizmo_color
 
+        giz_type_1.color_highlight = gizmo_color_highlight
+        giz_type_2.color_highlight = gizmo_color_highlight
+        giz_type_3.color_highlight = gizmo_color_highlight
+        giz_type_4.color_highlight = gizmo_color_highlight
+
         giz_type_1.scale_basis = gizmo_scale_basis
         giz_type_2.scale_basis = gizmo_scale_basis
         giz_type_3.scale_basis = gizmo_scale_basis
         giz_type_4.scale_basis = gizmo_scale_basis
-        # ToDo: LineWidth + Color
 
         giz_type_1.line_width = gizmo_line_width
         giz_type_2.line_width = gizmo_line_width
@@ -471,7 +496,7 @@ def register():
 
     for cls in classes:
         register_class(cls)
-
+    bpy.types.VIEW3D_MT_mesh_add.append(add_object_button)
     bpy.types.Scene.custom_props = bpy.props.PointerProperty(type=CustomPropertyGroup)
     bpy.app.handlers.depsgraph_update_post.append(handlerFunc)
 
@@ -484,6 +509,7 @@ def unregister():
     for cls in classes:
         unregister_class(cls)
 
+    bpy.types.VIEW3D_MT_mesh_add.remove(add_object_button)
     bpy.app.handlers.depsgraph_update_post.remove(handlerFunc)
 
 
