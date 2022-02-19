@@ -32,19 +32,17 @@ def add_angle_object(self, context):
     scale_y = self.scale.y
     scale_z = self.scale.z
 
-    scale = 5
-
     verts = [Vector((0 * scale_x, .5 * scale_y, 0 * scale_z)),
              Vector((0 * scale_x, -.5 * scale_y, 0 * scale_z)),
-             Vector((scale * .5 * scale_x, .5 * scale_y, 0 * scale_z)),
-             Vector((scale * .5 * scale_x, -.5 * scale_y, 0 * scale_z)),
-             Vector((0 * scale_x, .5 * scale_y, scale * 1 * scale_z)),
-             Vector((0 * scale_x, -.5 * scale_y, scale * 1 * scale_z)),
+             Vector((2.5 * scale_x, .5 * scale_y, 0 * scale_z)),
+             Vector((2.5 * scale_x, -.5 * scale_y, 0 * scale_z)),
+             Vector((0 * scale_x, .5 * scale_y, 5 * scale_z)),
+             Vector((0 * scale_x, -.5 * scale_y, 5 * scale_z)),
 
-             Vector((scale * .5 * scale_x, .5 * scale_y, .5 * scale_z)),
-             Vector((scale * .5 * scale_x, -.5 * scale_y, .5 * scale_z)),
-             Vector((.5 * scale_x, .5 * scale_y, scale * 1 * scale_z)),
-             Vector((.5 * scale_x, -.5 * scale_y, scale * 1 * scale_z)),
+             Vector((2.5 * scale_x, .5 * scale_y, .5 * scale_z)),
+             Vector((2.5 * scale_x, -.5 * scale_y, .5 * scale_z)),
+             Vector((.5 * scale_x, .5 * scale_y, 5 * scale_z)),
+             Vector((.5 * scale_x, -.5 * scale_y, 5 * scale_z)),
              Vector((.5 * scale_x, .5 * scale_y, .5 * scale_z)),
              Vector((.5 * scale_x, -.5 * scale_y, .5 * scale_z))]
 
