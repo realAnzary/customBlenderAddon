@@ -2,13 +2,8 @@ import bmesh
 import bpy
 import mathutils
 import bpy_extras
-# bpy.ops.wm.tool_set_by_id(name="builtin.select_lasso")
-# Rework: Redo the entire imports so they are more function specific, dont need everything from bpy or mathutils
-# ToDo: Restructure entire code, this looks like ass (and maybe even comment the entire thing)
-# Optimize: Add Timer Functions and look at optimizations
-# Findout: (use __init__ file to clear up this mess and) split up the code to different files?
-#  Anything diffrent with Imports?
-# ToDo: KeyMaps
+
+
 bl_info = {
     "name": "Custom Addon",
     "description": "Custom Toolkit zum Riggen von Füßen",
@@ -23,12 +18,6 @@ bl_info = {
 
 
 def find_by_name(scene, name):
-    """
-    Looks for specific String in Object Names\n
-    :param scene: Blender Data from current session
-    :param name: The String the Function is looking for
-    :return: A List of all the Objects containing the String in their Name
-    """
     returnedObjects = []
     for objects in scene.objects:
         if name in objects.name:
@@ -36,7 +25,6 @@ def find_by_name(scene, name):
     return returnedObjects
 
 
-# ToDo: Make this use the add_new_object in the main function and remove this shit
 def add_angle_object(self, context):
     from mathutils import Vector
 
@@ -78,28 +66,6 @@ def add_angle_object(self, context):
     bpy_extras.object_utils.object_data_add(context, mesh, operator=self)
 
 
-def add_new_object(self, context, name, verts, edges, faces):
-    """
-    Creates new Object in current Blender Scene\n
-    :param self: idk why but just do it
-    :param context: Blender Data from current session
-    :param name: Name of the new Object
-    :param verts: List of Vertices of the new Object
-    :param edges: List of Edges of the new Object
-    :param faces: List of Faces of the new Object
-    :return: The new Object
-    """
-    # Create new Mesh
-    mesh = bpy.data.meshes.new(name=name)
-    # Add Mesh-Data
-    mesh.from_pydata(verts, edges, faces)  # Findout: Do i need edges and faces or can i just work with verts and faces
-    # Update geometry
-    mesh.update()
-    # return the object to use it later
-    return bpy_extras.object_utils.object_data_add(context, mesh, operator=self)
-
-
-# noinspection PyUnusedLocal
 def add_object_button(self, context):
     self.layout.operator(
         AddAngleObject.bl_idname,
@@ -142,32 +108,28 @@ class CustomAddonPanel(bpy.types.Panel):
         layout.operator('custom.spawn_bones', text="Armature & Knochen hinzufügen")
         layout.prop(context.scene.custom_props, "gizmo_visibility", text="Gizmos anzeigen")
         layout.label(text="Joint Positionen setzen")
-        box = layout.box()
-        row = box.row(align=True)
-        row.operator('custom.set_value_joint1', text="Cruris / Joint1 Position setzen")
-        row = box.row()
-        row.operator('custom.set_value_joint2', text="Talus / Joint2 Position setzen")
-        row = box.row()
-        row.operator('custom.set_value_joint3', text="Antetarsus / Joint3 Position setzen")
-        row = box.row()
-        row.operator('custom.set_value_joint4', text="Calcaneus / Joint4 Position setzen")
+        layout.operator('custom.set_value_joint1', text="Cruris / Joint1 Position setzen")
+        layout.operator('custom.set_value_joint2', text="Talus / Joint2 Position setzen")
+        layout.operator('custom.set_value_joint3', text="Antetarsus / Joint3 Position setzen")
+        layout.operator('custom.set_value_joint4', text="Calcaneus / Joint4 Position setzen")
 
         box = layout.box()
         row = box.row()
         row.prop(context.scene.custom_props, "expanded",
                  icon="TRIA_DOWN" if context.scene.custom_props.expanded else "TRIA_RIGHT",
-                 icon_only=True, emboss=False)
+                 icon_only=True, emboss=False
+                 )
         row.label(text="Joint Informationen")
 
         if context.scene.custom_props.expanded:
             row = box.row()
-            row.prop(context.scene.custom_props, "cruris_vec", text="Cruris")
+            row.prop(context.scene.custom_props, "cruris_vec")
             row = box.row()
-            row.prop(context.scene.custom_props, "talus_vec", text="Talus")
+            row.prop(context.scene.custom_props, "talus_vec")
             row = box.row()
-            row.prop(context.scene.custom_props, "antetarsus_vec", text="Antetarsus")
+            row.prop(context.scene.custom_props, "antetarsus_vec")
             row = box.row()
-            row.prop(context.scene.custom_props, "calcaneus_vec", text="Calcaneus")
+            row.prop(context.scene.custom_props, "calcaneus_vec")
         # col = layout.column(heading="Header")
 
 
@@ -350,16 +312,13 @@ class GizmoShape_LineCube(bpy.types.Gizmo):
 
     def setup(self):
         if not hasattr(self, "custom_shape"):
-            # Findout: Can i switch GizmoTypes at runtime?
             self.shape = self.new_custom_shape('LINES', shape_Line_Cube)
             # self.shape = self.new_custom_shape('TRIS', shape_Tris_Cube)
 
 
-# Findout: Linewidth not working, but ffs why?????
-# Findout: Wtf is this color format?
 class jointGizmos(bpy.types.GizmoGroup):
     bl_label = "Joint Gizmogroup"
-    bl_idname = 'OBJECT_GGT_gizmo_joints'
+    bl_idname = "OBJECT_GGT_gizmo_joints"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
     bl_options = {'3D', 'PERSISTENT'}
@@ -381,7 +340,7 @@ class jointGizmos(bpy.types.GizmoGroup):
 
         gizmo_matrix_basis = mathutils.Matrix.Translation((0, 0, 0)).normalized()
         gizmo_scale_basis = 1
-        gizmo_color = 1.0, 0.5, 0
+        gizmo_color = 1.0, 0.5, 0.0
         gizmo_color_highlight = 1, 1, 1
         gizmo_line_width = 1.0
 
@@ -416,7 +375,6 @@ class jointGizmos(bpy.types.GizmoGroup):
         self.giz4 = giz_type_4
 
     def refresh(self, context):
-        # Rework: i hate how i did the Matrix calculation, so idk find a way to make it better, is there even one?
         # Joint 1
         vec = mathutils.Vector((context.scene.custom_props.cruris_vec[0],
                                 context.scene.custom_props.cruris_vec[1],
@@ -464,7 +422,6 @@ class jointGizmos(bpy.types.GizmoGroup):
         self.giz4.hide = not context.scene.custom_props.gizmo_visibility
 
 
-# Findout: Can i do this with action or mode as Parameter? if so then redo this
 class SetPositionJoint1(bpy.types.Operator):
     bl_idname = 'custom.set_value_joint1'
     bl_label = "Sets the Vector Value for Joint 1"
@@ -556,4 +513,3 @@ def unregister():
 
 if __name__ == '__main__':
     register()
-# Fix: Sushi bestellen wenn das hier mal fertig ist
